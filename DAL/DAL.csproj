@@ -49,6 +49,7 @@
     <Compile Include="BusinessLogic\StudentRepository.cs" />
     <Compile Include="BusinessLogic\SemesterRepository.cs" />
     <Compile Include="BusinessLogic\DisciplineRepository.cs" />
+    <Compile Include="BusinessLogic\UnitOfWork.cs" />
     <Compile Include="DataAccess\SqlDataAccess.cs" />
     <Compile Include="Models\StudentModel.cs" />
     <Compile Include="Repository\IGenericRepository.cs" />
