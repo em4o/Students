@@ -78,7 +78,7 @@
 
                 Disciplines
 
-                <a class="page-action" onclick="createDiscipline();">
+                <a class="page-action" onclick="insertDiscipline();">
                     + Add New Discipline
                 </a>
 
@@ -141,108 +141,110 @@
 <script type="text/javascript">
 
     $(document).ready(function () {
-
-        GetAllDisciplines();
-
+        disciplineModule.getAll();
     });
 
-    function GetAllDisciplines() {
+    var disciplineModule = {
+        getAll: function () {
+            var disciplineRows = $('#disciplineTable tbody');
+            $.ajax({
+                type: 'GET',
+                url: "api/discipline/GetAll",
+                dataType: 'json',
+                success: function (data) {
 
-        var disciplines = $('#disciplineTable tbody');
+                    disciplineRows.empty();
+                    $.each(data, function (index, val) {
 
-        $.ajax({
-            type: 'GET',
-            url: "api/discipline/GetAll",
-            dataType: 'json',
-            success: function (data) {
+                        var rowCells = '<td>' + val.DisciplineName + '</td>';
+                        rowCells += '<td>' + val.ProfessorName + '</td>';
+                        rowCells += '<td class="table-grid-cell-center"><button type="button" class="btn btn-primary" onclick="updateDiscipline(' + val.DisciplineId + ');">Edit</button></td>';
+                        rowCells += '<td class="table-grid-cell-center"><button type="button" class="btn btn-danger" onclick="deleteDiscipline(' + val.DisciplineId + ');">Delete</button></td>';
+                        disciplineRows.append('<tr>' + rowCells + '</tr>');
+                    });
+                }
+            });
+        },
+        getById: function (id) {
+            $.ajax({
+                type: 'GET',
+                url: "api/discipline/GetById/?id=" + id,
+                dataType: 'json',
+                success: function (data) {
+                    $('#disciplineName').val(data.DisciplineName);
+                    $('#professorName').val(data.ProfessorName);
+                    $('#disciplineModal').attr('data-Id', data.DisciplineId);
+                }
+            });
+        },
+        save: function () {
+            var disciplineName = $('#disciplineName').val();
+            var professorName = $('#professorName').val();
+            var disciplineId = $('#disciplineModal').attr('data-Id');
 
-                disciplines.empty();
+            var model = {
+                DisciplineId: parseInt(disciplineId),
+                DisciplineName: disciplineName,
+                ProfessorName: professorName
+            };
 
-                $.each(data, function (index, val) {
-
-                    var rowCells = '<tr>';
-                    rowCells += '<td>' + val.DisciplineName + '</td>';
-                    rowCells += '<td>' + val.ProfessorName + '</td>';
-                    rowCells += '<td class="table-grid-cell-center"><button type="button" class="btn btn-primary" onclick="editDiscipline(' + val.DisciplineId + ');">Edit</button></td>';
-                    rowCells += '<td class="table-grid-cell-center"><button type="button" class="btn btn-danger" onclick="deleteDiscipline(' + val.DisciplineId + ');">Delete</button></td>';
-                    rowCells += '</tr>'
-                    disciplines.append(rowCells);
-                });
+            var postUrl = "api/Discipline/Insert/";
+            if (model.DisciplineId > 0) {
+                postUrl = "api/Discipline/Update/";
             }
-        });
-    }
 
-    function GetDisciplineById(id) {
-        $.ajax({
-            type: 'GET',
-            url: "api/discipline/GetById/?id=" + id,
-            dataType: 'json',
-            success: function (data) {
-                $('#disciplineName').val(data.DisciplineName);
-                $('#professorName').val(data.ProfessorName);
-                $('#disciplineModal').attr('data-Id', data.DisciplineId);
-            }
-        });
-    }
-
-    function createDiscipline()
-    {
-        clearModal();
-        $('#disciplineModal').modal('show');
-    }
-
-    function editDiscipline(id) {
-        clearModal();
-        GetDisciplineById(id);
-        $('#disciplineModal').modal('show');
-    }
-
-    function saveDiscipline() {
-
-        var disciplineName = $('#disciplineName').val();
-        var professorName = $('#professorName').val();
-        var disciplineId = $('#disciplineModal').attr('data-Id');
-
-        var model = {
-            DisciplineId: parseInt(disciplineId),
-            DisciplineName: disciplineName,
-            ProfessorName: professorName
-        };
-
-       // console.log(model);
-
-        var postUrl = "api/Discipline/Insert/";
-
-        console.log(model.DisciplineId);
-        console.log(typeof (model.DisciplineId));
-        if (model.DisciplineId > 0) {
-            postUrl = "api/Discipline/Update/";
-        }
-
-        $.ajax({
-            type: 'POST',
-            url: postUrl,
-            dataType: 'json',
-            data: model,
-            success: function (data) {
-                GetAllDisciplines();
-                $('#disciplineModal').modal('hide');
-            }
-        });
-    }
-
-    function deleteDiscipline(id) {
-        var checkstr = confirm('are you sure you want to delete this discipline?');
-        if (checkstr == true) {
+            $.ajax({
+                type: 'POST',
+                url: postUrl,
+                dataType: 'json',
+                data: model,
+                success: function (data) {
+                    disciplineModule.getAll();
+                    $('#disciplineModal').modal('hide');
+                }
+            });
+        },
+        delete: function (id) {
             $.ajax({
                 type: 'POST',
                 url: "api/Discipline/Delete/?id=" + id,
                 dataType: 'json',
                 success: function (data) {
-                    GetAllDisciplines();
+                    disciplineModule.getAll();
                     $('#disciplineModal').modal('hide');
                 }
             });
+        }
+    }
+
+    function GetDisciplineById(id) {
+        disciplineModule.getById(id);
+    }
+
+    // insert
+    function insertDiscipline()
+    {
+        clearModal();
+        $('#disciplineModal').modal('show');
+    }
+
+    // update
+    function updateDiscipline(id) {
+        clearModal();
+        disciplineModule.getById(id);
+        $('#disciplineModal').modal('show');
+    }
+
+    // save
+    function saveDiscipline() {
+        disciplineModule.save();    
+    }
+
+    // delete
+    function deleteDiscipline(id) {
+        var checkstr = confirm('are you sure you want to delete this discipline?');
+        if (checkstr == true) {
+            disciplineModule.delete(id);
         } else {
             return false;
         }
