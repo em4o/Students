@@ -1,0 +1,260 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <script src="Scripts/jquery-3.4.1.min.js"></script>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js" integrity="sha384-LtrjvnR4Twt/qOuYxE721u19sVFLVSA4hf/rRt6PrZTmiPltdZcI7q7PXQBYTKyf" crossorigin="anonymous"></script>
+
+    <style>
+
+        .container h1 {
+            padding-top: 30px;
+            padding-bottom: 30px;
+        }
+
+        .page-action:hover {
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        a:focus, a:hover {
+            color: #23527c;
+            text-decoration: underline;
+        }
+
+        page-action {
+            margin-left: 10%;
+            color: #c4c4c4;
+        }
+
+        .page-action {
+            margin-left: 10%;
+            color: rgb(196, 196, 196);
+        }
+
+        main {
+            padding-top: 50px;
+        }
+    </style>
+
+    <title>Discipline</title>
+</head>
+<body>
+
+    <header>
+        <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+            <a class="navbar-brand" href="#">Students</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="#">Disciplines<span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link disabled" href="#">Semesters</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link disabled" href="#">Students</a>
+                    </li>
+                </ul>
+                <form class="form-inline mt-2 mt-md-0">
+                    <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
+                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                </form>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main">
+
+        <div class="container body-content">
+
+            <h1>
+
+                Disciplines
+
+                <a class="page-action" onclick="createDiscipline();">
+                    + Add New Discipline
+                </a>
+
+            </h1>
+
+            <table id="disciplineTable" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">Discipline Name</th>
+                        <th scope="col">Professor Name</th>
+                        <th scope="col">Edit</th>
+                        <th scope="col">Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="container">
+            <p class="float-right"><a href="#">Back to top</a></p>
+            <p>&copy; 2021 Company, Inc. &middot; <a href="#">Privacy</a> &middot; <a href="#">Terms</a></p>
+        </footer>
+
+    </main>
+
+    <!-- Modal -->
+    <div class="modal fade" id="disciplineModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Discipline</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="recipient-name" class="col-form-label">Discipline Name*</label>
+                            <input type="text" class="form-control" id="disciplineName">
+                        </div>
+                        <div class="form-group">
+                            <label for="message-text" class="col-form-label">Professor Name*</label>
+                            <input type="text" class="form-control" id="professorName">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="saveDiscipline" onclick="saveDiscipline();">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        GetAllDisciplines();
+
+    });
+
+    function GetAllDisciplines() {
+
+        var disciplines = $('#disciplineTable tbody');
+
+        $.ajax({
+            type: 'GET',
+            url: "api/discipline/GetAll",
+            dataType: 'json',
+            success: function (data) {
+
+                disciplines.empty();
+
+                $.each(data, function (index, val) {
+
+                    var rowCells = '<tr>';
+                    rowCells += '<td>' + val.DisciplineName + '</td>';
+                    rowCells += '<td>' + val.ProfessorName + '</td>';
+                    rowCells += '<td class="table-grid-cell-center"><button type="button" class="btn btn-primary" onclick="editDiscipline(' + val.DisciplineId + ');">Edit</button></td>';
+                    rowCells += '<td class="table-grid-cell-center"><button type="button" class="btn btn-danger" onclick="deleteDiscipline(' + val.DisciplineId + ');">Delete</button></td>';
+                    rowCells += '</tr>'
+                    disciplines.append(rowCells);
+                });
+            }
+        });
+    }
+
+    function GetDisciplineById(id) {
+        $.ajax({
+            type: 'GET',
+            url: "api/discipline/GetById/?id=" + id,
+            dataType: 'json',
+            success: function (data) {
+                $('#disciplineName').val(data.DisciplineName);
+                $('#professorName').val(data.ProfessorName);
+                $('#disciplineModal').attr('data-Id', data.DisciplineId);
+            }
+        });
+    }
+
+    function createDiscipline()
+    {
+        clearModal();
+        $('#disciplineModal').modal('show');
+    }
+
+    function editDiscipline(id) {
+        clearModal();
+        GetDisciplineById(id);
+        $('#disciplineModal').modal('show');
+    }
+
+    function saveDiscipline() {
+
+        var disciplineName = $('#disciplineName').val();
+        var professorName = $('#professorName').val();
+        var disciplineId = $('#disciplineModal').attr('data-Id');
+
+        var model = {
+            DisciplineId: parseInt(disciplineId),
+            DisciplineName: disciplineName,
+            ProfessorName: professorName
+        };
+
+       // console.log(model);
+
+        var postUrl = "api/Discipline/Insert/";
+
+        console.log(model.DisciplineId);
+        console.log(typeof (model.DisciplineId));
+        if (model.DisciplineId > 0) {
+            postUrl = "api/Discipline/Update/";
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: postUrl,
+            dataType: 'json',
+            data: model,
+            success: function (data) {
+                GetAllDisciplines();
+                $('#disciplineModal').modal('hide');
+            }
+        });
+    }
+
+    function deleteDiscipline(id) {
+        var checkstr = confirm('are you sure you want to delete this discipline?');
+        if (checkstr == true) {
+            $.ajax({
+                type: 'POST',
+                url: "api/Discipline/Delete/?id=" + id,
+                dataType: 'json',
+                success: function (data) {
+                    GetAllDisciplines();
+                    $('#disciplineModal').modal('hide');
+                }
+            });
+        } else {
+            return false;
+        }
+    }
+
+    function clearModal()
+    {
+        $('#disciplineName').val('');
+        $('#professorName').val('');
+        $('#disciplineModal').attr('data-Id', 0);
+    }
+
+</script>
+
+</html>
