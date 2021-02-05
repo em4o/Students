@@ -5,33 +5,33 @@ using System.Web.Http;
 
 namespace StudentsWebApp.Controllers
 {
-    public class DisciplineController : ApiController
+    public class StudentController : ApiController
     {
-        private DisciplineRepository _repository;
+        private StudentRepository _repository;
 
-        public DisciplineController()
+        public StudentController()
         {
-            _repository = new DisciplineRepository();
+            _repository = new StudentRepository();
         }
 
         [HttpGet]
-        [Route("api/discipline/GetAll")]
-        public IEnumerable<DisciplineModel> GetAll()
+        [Route("api/student/GetAll")]
+        public IEnumerable<StudentModel> GetAll()
         {
             var data = _repository.GetAll();
             return data;
         }
 
-        [Route("api/discipline/GetById")]
-        public DisciplineModel GetById(int id)
+        [Route("api/student/GetById")]
+        public StudentModel GetById(int id)
         {
             var data = _repository.GetById(id);
             return data;
         }
 
         [HttpPost]
-        [Route("api/discipline/Insert")]
-        public void Insert(DisciplineModel model)
+        [Route("api/student/Insert")]
+        public void Insert(StudentModel model)
         {
             if (ModelState.IsValid)
             {
@@ -40,8 +40,8 @@ namespace StudentsWebApp.Controllers
         }
 
         [HttpPost]
-        [Route("api/discipline/Update")]
-        public void Update(DisciplineModel model)
+        [Route("api/student/Update")]
+        public void Update(StudentModel model)
         {
             if (ModelState.IsValid)
             {
@@ -50,7 +50,7 @@ namespace StudentsWebApp.Controllers
         }
 
         [HttpPost]
-        [Route("api/discipline/Delete")]
+        [Route("api/student/Delete")]
         public void Delete(int id)
         {
             _repository.Delete(id);
